@@ -1,0 +1,62 @@
+---
+- name: install zabbix agent 
+  hosts: all
+  gather_facts: yes
+  become: true
+  tasks:
+    - name: Copy zabbix file centos 
+      copy: 
+        src: "/root/myproject/zabbix_install/zabbix-agent.rpm" 
+        dest: "/tmp/zabbix-agent.rpm"
+      when: ansible_os_family == "RedHat"
+      tags:
+        - copy-agent-centos
+
+    - name: Copy zabbix file ubuntu 
+      copy: 
+        src: "/root/myproject/zabbix_install/zabbix-agent.deb" 
+        dest: "/tmp/zabbix-agent.deb"
+      when: ansible_os_family == "Debian"
+      tags:
+        - copy-agent-ubuntu
+
+    - name: Install zabbix agent centos 
+      yum:
+        name: /tmp/zabbix-agent.rpm
+        state: latest
+      when: ansible_os_family == "RedHat"
+      tags:
+        - install-zabbix-centos
+
+    - name: Install zabbix agent ubuntu 
+      apt:
+        name: /tmp/zabbix-agent.deb
+        state: latest
+      when: ansible_os_family == "Debian"
+      tags:
+        - install-zabbix-ubuntu
+
+    - name: Create new zabbix config file from template centos
+      become: yes
+      template:
+        src: "templates/zabbix_agentd.conf.j2"
+        dest: "/etc/zabbix/zabbix_agentd.conf"
+      when: ansible_os_family == "RedHat"
+      tags:
+        - copy-conf-centos
+    - name: Create new zabbix config file from template ubuntu
+      become: yes
+      template:
+        src: "templates/zabbix_agentd.conf.j2"
+        dest: "/etc/zabbix/zabbix_agentd.conf"
+      when: ansible_os_family == "Debian"
+      tags:
+        - copy-conf-ubuntu
+
+    - name: Enable zabbix agent
+      systemd:
+        name: zabbix-agent
+        state: restarted
+        enabled: yes
+      tags:
+        - enable

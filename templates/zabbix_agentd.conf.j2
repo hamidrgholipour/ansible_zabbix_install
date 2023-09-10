@@ -1,0 +1,8 @@
+PidFile=/var/run/zabbix/zabbix_agentd.pid
+LogFile=/var/log/zabbix/zabbix_agentd.log
+LogFileSize=0
+Server=10.192.12.16
+ServerActive=127.0.0.1
+Hostname={{ ansible_hostname }}
+#Hostname={{ ansible_hostname+"-"+hostvars[inventory_hostname]['ansible_default_ipv4']['address'].split(".")[2]+"."+hostvars[inventory_hostname]['ansible_default_ipv4']['address'].split(".")[3] }}
+Include=/etc/zabbix/zabbix_agentd.d/*.conf
